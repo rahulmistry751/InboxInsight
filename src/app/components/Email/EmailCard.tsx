@@ -12,7 +12,7 @@ interface EmailCardProps {
   receivedAt: number;
   isFavorite?: boolean;
   isRead?: boolean;
-  onCardClick: (id: string) => void;
+  onCardClick: (id: string,receivedAt: string,fromEmail: string,fromName: string,subject: string,body: string) => void;
 }
 
 const EmailCard = ({
@@ -26,22 +26,17 @@ const EmailCard = ({
   isRead,
   onCardClick,
 }: EmailCardProps) => {
-  const { setSelectedEmailDetails } = useEmailContext();
   return (
     <div
       className={`border-[1px] border-neutralLight rounded-md py-2 px-6 flex gap-6  ${
         isRead ? "bg-backgroundAccent1" : "bg-white"
       }`}
       onClick={() => {
-        setSelectedEmailDetails({
-          date: formatTimestamp(receivedAt),
-          fromEmail,
-          fromName,
-          id: uniqueEmailId,
-          subject,
-          body: "",
-        });
-        onCardClick(uniqueEmailId);
+        onCardClick(uniqueEmailId,formatTimestamp(receivedAt),
+        fromEmail,
+        fromName,
+        subject,
+        "");
       }}
     >
       <section>

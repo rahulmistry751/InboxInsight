@@ -23,9 +23,9 @@ const Filter = ({ onFilterClick, selectedFilter }:FilterProps) => {
             <button
               key={filter.id}
               className={` rounded-2xl py-px px-3.5  ${
-                selectedFilter
+                selectedFilter===filter.code
                   ? "bg-backgroundAccent1 border border-neutralLight border-solid"
-                  : "text-black"
+                  : "text-black bg-none"
               }`}
               onClick={() => handleOnFilterClick(filter.code)}
             >
