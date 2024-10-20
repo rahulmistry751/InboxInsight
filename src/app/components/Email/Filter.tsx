@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useEmailContext } from "../../contexts/EmailContext";
-import { FilterCode } from "@/app/types/email";
+import { type Filter, FilterCode } from "@/app/types/email";
 import { FILTERS } from "@/app/constants/filters";
 
 interface FilterProps {
@@ -13,13 +12,13 @@ interface FilterProps {
 const Filter = ({ onFilterClick, selectedFilter }:FilterProps) => {
   const handleOnFilterClick = useCallback((code: FilterCode) => {
     onFilterClick(code);
-  }, []);
+  }, [onFilterClick]);
 
   return (
     <section className="col-span-12 flex items-center mt-6 mb-3">
       <div className="mr-6 w-max whitespace-nowrap text-black">Filter By: </div>
       <div className="flex gap-4 grow flex-wrap">
-        {FILTERS.map((filter) => {
+        {FILTERS.map((filter: Filter) => {
           return (
             <button
               key={filter.id}

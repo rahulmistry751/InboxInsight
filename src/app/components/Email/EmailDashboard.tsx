@@ -1,5 +1,5 @@
 "use client";
-import { EmailList, FilterCode } from "../../types/email";
+import { EmailList, EmailStates, FilterCode } from "../../types/email";
 import EmailCard from "./EmailCard";
 import EmailDetails from "./EmailDetails";
 import Filter from "./Filter";
@@ -13,8 +13,11 @@ const EmailDashboard = () => {
   const [selectedFilter, setSelectedFilter] = useState<FilterCode | string>("");
   const [emailStates, setEmailStates] = useState(() => {
     // Retrieve from localStorage on initial load
-    const storedStates = localStorage.getItem("emailStates");
-    return storedStates ? JSON.parse(storedStates) : {};
+    if(typeof window !== 'undefined'){
+      const storedStates = localStorage.getItem("emailStates");
+      return storedStates ? JSON.parse(storedStates) : {};
+    }
+    return {}
   });
   const [selectedPageNumber, setSelectedPageNumber] = useState(1);
   const { setSelectedEmailDetails, selectedEmailDetails } = useEmailContext();
@@ -43,9 +46,9 @@ const EmailDashboard = () => {
     } finally {
       setIsLoadingSelectedEmailContent(false);
     }
-  }, []);
+  }, [setSelectedEmailDetails]);
 
-  const filterEmailBySelectedFilter = (filterCode: FilterCode) => {
+  const filterEmailBySelectedFilter = useCallback((filterCode: FilterCode) => {
     console.log("filterCode in filterEmailBySelectedFilter", filterCode);
     console.log("emails.list in filterEmailBySelectedFilter", emails);
      const modified= emails.list.map(
@@ -56,45 +59,45 @@ const EmailDashboard = () => {
         );
         console.log("modif", modified);
     
-    // switch (filterCode) {
-    //   case FilterCode.FAV:
-    //     const modified= emails.list.map(
-    //       (email: EmailList) => {
+    switch (filterCode) {
+      case FilterCode.FAV:
+        const modified= emails.list.map(
+          (email: EmailList) => {
             
-    //         return email;
-    //       }
-    //     );
-    //     console.log("modif", modified);
-    //     const filteredEmailByFavorite = emails.list.filter(
-    //       (email: EmailList) => {
-    //         console.log("email check", emailStates[email.id]?.favorite);
-    //         return emailStates[email.id]?.favorite || false
-    //       }
-    //     );
-    //     console.log("filteredEmailByFavorite", filteredEmailByFavorite);
-    //     // setEmails((prev) => ({ ...prev, list: filteredEmailByFavorite }));
-    //     setSelectedFilter(filterCode);
-    //     break;
-    //   case FilterCode.UNRD:
-    //     const filteredEmailByUnread = emails.list.filter(
-    //       (email: EmailList) => !emailStates[email.id]?.read
-    //     );
-    //     setEmails((prev) => ({ ...prev, list: filteredEmailByUnread }));
-    //     setSelectedFilter(filterCode);
-    //     break;
-    //   case FilterCode.RD:
-    //     const filteredEmailByRead = emails.list.filter(
-    //       (email: EmailList) => emailStates[email.id]?.read
-    //     );
-    //     setEmails((prev) => ({ ...prev, list: filteredEmailByRead }));
-    //     setSelectedFilter(filterCode);
-    //     break;
-    // }
-  };
+            return email;
+          }
+        );
+        console.log("modif", modified);
+        const filteredEmailByFavorite = emails.list.filter(
+          (email: EmailList) => {
+            console.log("email check", emailStates[email.id]?.favorite);
+            return emailStates[email.id]?.favorite || false
+          }
+        );
+        console.log("filteredEmailByFavorite", filteredEmailByFavorite);
+        // setEmails((prev) => ({ ...prev, list: filteredEmailByFavorite }));
+        setSelectedFilter(filterCode);
+        break;
+      case FilterCode.UNRD:
+        const filteredEmailByUnread = emails.list.filter(
+          (email: EmailList) => !emailStates[email.id]?.read
+        );
+        setEmails((prev) => ({ ...prev, list: filteredEmailByUnread }));
+        setSelectedFilter(filterCode);
+        break;
+      case FilterCode.RD:
+        const filteredEmailByRead = emails.list.filter(
+          (email: EmailList) => emailStates[email.id]?.read
+        );
+        setEmails((prev) => ({ ...prev, list: filteredEmailByRead }));
+        setSelectedFilter(filterCode);
+        break;
+    }
+  },[emails,emailStates]);
 
-  const handleMarkAsRead = (emailId: string) => {
+  const handleMarkAsRead = useCallback((emailId: string) => {
     console.log("emailId", emailId);
-    setEmailStates((prevStates: any) => {
+    setEmailStates((prevStates: EmailStates) => {
       const updatedStates = {
         ...prevStates,
         [emailId]: {
@@ -105,10 +108,10 @@ const EmailDashboard = () => {
       localStorage.setItem("emailStates", JSON.stringify(updatedStates)); // Persist to localStorage
       return updatedStates;
     });
-  };
+  },[]);
 
   const handleToggleFavorite = (emailId: string) => {
-    setEmailStates((prevStates: any) => {
+    setEmailStates((prevStates: EmailStates) => {
       const updatedStates = {
         ...prevStates,
         [emailId]: {
@@ -121,7 +124,7 @@ const EmailDashboard = () => {
     });
   };
 
-  const fetchEmailsByPageNumber = async (pageNumber: number) => {
+  const fetchEmailsByPageNumber = useCallback(async (pageNumber: number) => {
     try {
       console.log("pageNumber", pageNumber);
       setAreEmailsLoading(true);
@@ -133,10 +136,11 @@ const EmailDashboard = () => {
       if (responseInJson) setEmails(responseInJson);
       console.log("response", response);
     } catch (error) {
+      console.error("Error fetching emails",error)
     } finally {
       setAreEmailsLoading(false);
     }
-  };
+  },[]);
 
   const fetchEmails = async () => {
     try {

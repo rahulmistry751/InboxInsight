@@ -2,7 +2,6 @@
 import { useEmailContext } from "@/app/contexts/EmailContext";
 import formatTimestamp from "../../utils/getDateInFormat";
 import Avatar from "../Common/Avatar";
-import { Dispatch, SetStateAction } from "react";
 
 interface EmailCardProps {
   uniqueEmailId: string;
