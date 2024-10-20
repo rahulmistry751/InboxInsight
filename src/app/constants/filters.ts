@@ -1,20 +1,22 @@
+import { FilterCode } from "../types/email";
+
 export const FILTERS = [
   {
     id: "1",
     name: "Unread",
-    code: "UNRD",
+    code: FilterCode.UNRD,
     isSelected: false,
   },
   {
     id: "2",
     name: "Read",
-    code: "RD",
+    code:  FilterCode.RD,
     isSelected: false,
   },
   {
     id: "3",
     name: "Favorites",
-    code: "FAV",
+    code: FilterCode.FAV,
     isSelected: false,
   },
 ];

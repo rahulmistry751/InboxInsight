@@ -30,7 +30,7 @@ const EmailDetails = ({
     if (!isLoading) {
       markAsRead(openedEmailUniqueId);
     }
-  }, [openedEmailUniqueId, isLoading]);
+  }, [openedEmailUniqueId, isLoading, markAsRead]);
   return (
     <section className="bg-white col-span-8 border-[1px] border-neutralLight rounded-md p-6 flex flex-row gap-6 mb-6">
       {isLoading ? (

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import Icons from "./Icons/Icons";
 
 interface PaginationProps {
@@ -15,7 +15,7 @@ const Pagination = ({
 
   const handleOnPageClick = useCallback((pageNumber: number) => {
     onPageClick(pageNumber);
-  },[]);
+  },[onPageClick]);
 
   return (
     <div className="flex gap-4">

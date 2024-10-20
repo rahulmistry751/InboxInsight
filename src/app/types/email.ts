@@ -33,5 +33,15 @@ enum FilterCode {
   "FAV"="FAV"
 }
 
+type EmailStatus = {
+  read: boolean;
+  favorite: boolean;
+};
 
-export { type Filter, type EmailList, type SelectedEmail, FilterCode };
+
+type EmailStates = {
+  [key: string]: EmailStatus;
+};
+
+
+export { type Filter, type EmailList, type SelectedEmail,type EmailStates ,FilterCode };
