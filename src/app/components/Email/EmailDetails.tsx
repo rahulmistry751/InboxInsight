@@ -24,13 +24,13 @@ const EmailDetails = ({
   isMarkedAsFavorite,
   markAsRead,
 }: EmailDetailsProps) => {
+
   useEffect(() => {
-    console.log("openedEmailUniqueId", openedEmailUniqueId);
-    console.log("isLoading", isLoading);
     if (!isLoading) {
       markAsRead(openedEmailUniqueId);
     }
   }, [openedEmailUniqueId, isLoading, markAsRead]);
+  
   return (
     <section className="bg-white col-span-8 border-[1px] border-neutralLight rounded-md p-6 flex flex-row gap-6 mb-6">
       {isLoading ? (

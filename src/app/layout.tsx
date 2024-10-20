@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import { EmailContextProvider } from "./contexts/EmailContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -22,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.className} antialiased`}>
-        <EmailContextProvider>{children}</EmailContextProvider>
+        {children}
       </body>
     </html>
   );

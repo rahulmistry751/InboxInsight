@@ -6,109 +6,89 @@ import Filter from "./Filter";
 import Pagination from "../Common/Pagination";
 import Icons from "../Common/Icons/Icons";
 import { useCallback, useEffect, useState } from "react";
-import { useEmailContext } from "@/app/contexts/EmailContext";
 import { DEFAULT_SELECTED_EMAIL } from "@/app/constants/email";
 
 const EmailDashboard = () => {
   const [selectedFilter, setSelectedFilter] = useState<FilterCode | string>("");
   const [emailStates, setEmailStates] = useState(() => {
     // Retrieve from localStorage on initial load
-    if(typeof window !== 'undefined'){
+    if (typeof window !== "undefined") {
       const storedStates = localStorage.getItem("emailStates");
       return storedStates ? JSON.parse(storedStates) : {};
     }
-    return {}
+    return {};
   });
   const [selectedPageNumber, setSelectedPageNumber] = useState(1);
-  const { setSelectedEmailDetails, selectedEmailDetails } = useEmailContext();
+  const [ selectedEmailDetails,setSelectedEmailDetails ] = useState(DEFAULT_SELECTED_EMAIL);
   const [isLoadingSelectedEmailContent, setIsLoadingSelectedEmailContent] =
     useState<boolean>(false);
+  const [originalEmails, setOriginalEmails] = useState({ list: [], total: 0 });
   const [emails, setEmails] = useState({ list: [], total: 0 });
   const [areEmailsLoading, setAreEmailsLoading] = useState(false);
-  console.log("oitside emails", emails);
-  const fetchEmailById = useCallback(async (id: string) => {
-    try {
-      setIsLoadingSelectedEmailContent(true);
-      const response = await fetch(
-        `https://flipkart-email-mock.now.sh/?id=${id}`,
-        {
-          cache: "force-cache",
-        }
-      );
-      const jsonResponse = await response.json();
-      setSelectedEmailDetails((prev) => ({
-        ...prev,
-        body: jsonResponse.body,
-      }));
-    } catch (error) {
-      console.error("Error fetching email:", error);
-      setSelectedEmailDetails(DEFAULT_SELECTED_EMAIL);
-    } finally {
-      setIsLoadingSelectedEmailContent(false);
-    }
-  }, [setSelectedEmailDetails]);
 
-  const filterEmailBySelectedFilter = useCallback((filterCode: FilterCode) => {
-    console.log("filterCode in filterEmailBySelectedFilter", filterCode);
-    console.log("emails.list in filterEmailBySelectedFilter", emails);
-     const modified= emails.list.map(
-          (email: EmailList) => {
-            
-            return email;
+  const fetchEmailById = useCallback(
+    async (id: string,receivedAt: string,fromEmail: string,fromName: string,subject: string,body: string) => {
+      try {
+        setIsLoadingSelectedEmailContent(true);
+        setSelectedEmailDetails({id,date:receivedAt,fromEmail,fromName,body,subject})
+        const response = await fetch(
+          `https://flipkart-email-mock.now.sh/?id=${id}`,
+          {
+            cache: "force-cache",
           }
         );
-        console.log("modif", modified);
-    
-    switch (filterCode) {
-      case FilterCode.FAV:
-        const modified= emails.list.map(
-          (email: EmailList) => {
-            
-            return email;
-          }
+        const jsonResponse = await response.json();
+        setSelectedEmailDetails((prev) => ({
+          ...prev,
+          body: jsonResponse.body,
+        }));
+      } catch (error) {
+        console.error("Error fetching email:", error);
+        setSelectedEmailDetails(DEFAULT_SELECTED_EMAIL);
+      } finally {
+        setIsLoadingSelectedEmailContent(false);
+      }
+    },
+    [setSelectedEmailDetails]
+  );
+
+  const filterEmailBySelectedFilter = useCallback(
+    (filterCode: FilterCode) => {
+      setSelectedFilter(filterCode)
+      if (filterCode === FilterCode.FAV) {
+        const filteredEmail = originalEmails.list.filter(
+          (email: EmailList) => emailStates?.[email?.id]?.favorite
         );
-        console.log("modif", modified);
-        const filteredEmailByFavorite = emails.list.filter(
-          (email: EmailList) => {
-            console.log("email check", emailStates[email.id]?.favorite);
-            return emailStates[email.id]?.favorite || false
-          }
+        setEmails({ list: filteredEmail, total: filteredEmail.length });
+      } else if (filterCode === FilterCode.UNRD) {
+        const filteredEmail = originalEmails.list.filter(
+          (email: EmailList) => !emailStates?.[email?.id]?.read
         );
-        console.log("filteredEmailByFavorite", filteredEmailByFavorite);
-        // setEmails((prev) => ({ ...prev, list: filteredEmailByFavorite }));
-        setSelectedFilter(filterCode);
-        break;
-      case FilterCode.UNRD:
-        const filteredEmailByUnread = emails.list.filter(
-          (email: EmailList) => !emailStates[email.id]?.read
+        setEmails({ list: filteredEmail, total: filteredEmail.length });
+      } else if (filterCode === FilterCode.RD) {
+        const filteredEmail = originalEmails.list.filter(
+          (email: EmailList) => emailStates?.[email?.id]?.read
         );
-        setEmails((prev) => ({ ...prev, list: filteredEmailByUnread }));
-        setSelectedFilter(filterCode);
-        break;
-      case FilterCode.RD:
-        const filteredEmailByRead = emails.list.filter(
-          (email: EmailList) => emailStates[email.id]?.read
-        );
-        setEmails((prev) => ({ ...prev, list: filteredEmailByRead }));
-        setSelectedFilter(filterCode);
-        break;
-    }
-  },[emails,emailStates]);
+        setEmails({ list: filteredEmail, total: filteredEmail.length });
+      }
+    },
+    [emails, emailStates]
+  );
 
   const handleMarkAsRead = useCallback((emailId: string) => {
-    console.log("emailId", emailId);
     setEmailStates((prevStates: EmailStates) => {
       const updatedStates = {
         ...prevStates,
         [emailId]: {
           ...prevStates[emailId],
-          read: true, // Toggle read status
+          read: true,
         },
       };
-      localStorage.setItem("emailStates", JSON.stringify(updatedStates)); // Persist to localStorage
+      // Persist to localStorage
+      localStorage.setItem("emailStates", JSON.stringify(updatedStates)); 
       return updatedStates;
     });
-  },[]);
+  }, []);
 
   const handleToggleFavorite = (emailId: string) => {
     setEmailStates((prevStates: EmailStates) => {
@@ -116,7 +96,8 @@ const EmailDashboard = () => {
         ...prevStates,
         [emailId]: {
           ...prevStates[emailId],
-          favorite: !prevStates[emailId]?.favorite, // Toggle favorite status
+          // Toggle favorite status
+          favorite: !prevStates[emailId]?.favorite,
         },
       };
       localStorage.setItem("emailStates", JSON.stringify(updatedStates)); // Persist to localStorage
@@ -126,21 +107,24 @@ const EmailDashboard = () => {
 
   const fetchEmailsByPageNumber = useCallback(async (pageNumber: number) => {
     try {
-      console.log("pageNumber", pageNumber);
       setAreEmailsLoading(true);
       setSelectedPageNumber(pageNumber);
       const response = await fetch(
         `https://flipkart-email-mock.now.sh/?page=${pageNumber}`
       );
+
       const responseInJson = await response.json();
-      if (responseInJson) setEmails(responseInJson);
-      console.log("response", response);
+      if (responseInJson) {
+        setEmails(responseInJson)
+        setOriginalEmails(responseInJson)
+        setSelectedEmailDetails(DEFAULT_SELECTED_EMAIL)
+      };
     } catch (error) {
-      console.error("Error fetching emails",error)
+      console.error("Error fetching emails", error);
     } finally {
       setAreEmailsLoading(false);
     }
-  },[]);
+  }, []);
 
   const fetchEmails = async () => {
     try {
@@ -148,10 +132,10 @@ const EmailDashboard = () => {
       const response = await fetch("https://flipkart-email-mock.now.sh/", {
         cache: "no-store",
       });
-      const emailResponse = await response.json();
-      console.log("emailResponse", emailResponse);
+      const emailResponse = await response.json();;
       if (emailResponse) {
         setEmails(emailResponse);
+        setOriginalEmails(emailResponse)
       }
     } catch (error) {
       console.error("Error", error);
@@ -182,7 +166,7 @@ const EmailDashboard = () => {
           } flex flex-col gap-y-6 mb-6 overflow-hidden`}
         >
           <div className="flex flex-col gap-y-6 pb-3 h-[calc(100vh-11rem)] overflow-y-auto">
-            {emails && emails?.list
+            {emails?.list?.length
               ? emails.list.map((email: EmailList) => {
                   return (
                     <EmailCard
