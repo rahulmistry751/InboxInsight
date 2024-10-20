@@ -1,5 +1,5 @@
 "use client";
-import { useEmailContext } from "@/app/contexts/EmailContext";
+
 import formatTimestamp from "../../utils/getDateInFormat";
 import Avatar from "../Common/Avatar";
 
