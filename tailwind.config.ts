@@ -13,7 +13,9 @@ const config: Config = {
         background: "var(--background)",
         backgroundAccent1: "var(--background-accent-1)",
         backgroundAccent2: "var(--background-accent-2)",
+        // border
         neutralLight: "var(--neutral-light)",
+        // text
         neutralMedium: "var(--neutral-medium)",
       },
     },

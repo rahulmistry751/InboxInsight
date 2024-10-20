@@ -1,13 +1,18 @@
 "use client"
 import { createContext,  Dispatch,  SetStateAction,  useContext,  useState } from "react";
-import { Filter } from "../types/email";
+import { Filter, SelectedEmail } from "../types/email";
 import { FILTERS } from "../constants/filters";
+import { DEFAULT_SELECTED_EMAIL } from "../constants/email";
 
 interface EmailContextValue {
   selectedEmail: string;
   setSelectedEmail: Dispatch<SetStateAction<string>>;
   filters: Filter[];
   setFilters: Dispatch<SetStateAction<Filter[]>>;
+  setSelectedEmailDetails: Dispatch<
+    SetStateAction<SelectedEmail>
+  >;
+  selectedEmailDetails: SelectedEmail;
 }
 
 
@@ -22,9 +27,18 @@ export const EmailContextProvider = ({
 }) => {
   const [selectedEmail, setSelectedEmail] = useState("");
   const [filters, setFilters] = useState(FILTERS);
+  const [selectedEmailDetails, setSelectedEmailDetails] =
+    useState<SelectedEmail>(DEFAULT_SELECTED_EMAIL);
   return (
     <EmailContext.Provider
-      value={{ setSelectedEmail, selectedEmail, filters, setFilters }}
+      value={{
+        setSelectedEmail,
+        selectedEmail,
+        filters,
+        setFilters,
+        setSelectedEmailDetails,
+        selectedEmailDetails,
+      }}
     >
       {children}
     </EmailContext.Provider>
